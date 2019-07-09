@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>北极星IT教育</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <style type="text/css">
+        .layui-row{
+            height: 40px;
+        }
+        .person{
+            font-size: 20px;
+        }
+        .center{
+            text-align: center;
+        }
+        .left{
+            text-align: right;
+        }
+        .layui-form{
+            display: none;
+            padding: 10px;
+        }
+        .layui-input{
+            width: 80%;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-row person">
+    个人中心
+</div>
+
+<div class="layui-row">
+    <div class="layui-col-md6 left">
+        账号：
+    </div>
+    <div class="layui-col-md6" th:text="${currentUser.userName}"></div>
+</div>
+<div class="layui-row">
+    <div class="layui-col-md6 left">
+        用户名：
+    </div>
+    <div class="layui-col-md6" th:text="${currentUser.realName}"></div>
+</div>
+<div class="layui-row" th:if="${own}">
+    <div class="layui-col-md6 left">
+        电话：
+    </div>
+    <div class="layui-col-md6" th:text="${currentUser.phone}"></div>
+</div>
+<div class="layui-row" th:if="${own}">
+    <div class="layui-col-md6 left">
+        邮箱：
+    </div>
+    <div class="layui-col-md6" th:text="${currentUser.email}"></div>
+</div>
+<div class="layui-row">
+    <div class="layui-col-md6 left">
+        性别：
+    </div>
+    <div class="layui-col-md6" th:text="${currentUser.sex}" id="sex"></div>
+</div>
+<div class="layui-row">
+    <div class="layui-col-md6 left">
+        年龄：
+    </div>
+    <div class="layui-col-md6" th:text="${currentUser.age}"></div>
+</div>
+<div class="layui-row center">
+    <input type="hidden" class="id" th:value="${currentUser.id}">
+
+    <button class="layui-btn layui-btn-sm layui-btn-radius layui-btn-danger editInformation" th:if="${own}">信息修改</button>
+    <button class="layui-btn layui-btn-sm layui-btn-radius layui-btn-danger editPwd" th:if="${own}">修改密码</button>
+    <button class="layui-btn layui-btn-sm layui-btn-radius layui-btn-danger my-attention">
+        <span th:if="${own}">我</span><span th:if="${own} == false">他</span>的关注
+    </button>
+    <button class="layui-btn layui-btn-sm layui-btn-radius layui-btn-danger my-collection" th:if="${own}">
+        我的收藏
+    </button>
+    <button class="layui-btn layui-btn-sm layui-btn-radius layui-btn-danger attention" th:if="${own} == false">
+        关注
+    </button>
+</div>
+
+
+<div class="layui-form user-info">
+    <div class="layui-form-item">
+        <label class="layui-form-label">姓名</label>
+        <div class="layui-input-block">
+            <input type="text" id="realName" class="layui-input" th:value="${currentUser.realName}">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">性别</label>
+        <div class="layui-input-block">
+            <input type="radio" name="sex" value="男" title="男">
+            <input type="radio" name="sex" value="女" title="女" checked>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">电话</label>
+        <div class="layui-input-block">
+            <input type="text" id="phone" class="layui-input" th:value="${currentUser.phone}">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">邮箱</label>
+        <div class="layui-input-block">
+            <input type="text" id="email" class="layui-input" th:value="${currentUser.email}">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">年龄</label>
+        <div class="layui-input-block">
+            <input type="text" id="age" class="layui-input" th:value="${currentUser.age}">
+        </div>
+    </div>
+</div>
+
+<form class="layui-form edit-pwd" action="">
+    <div class="layui-form-item">
+        <label class="layui-form-label">旧密码</label>
+        <div class="layui-input-block">
+            <input type="password" id="oldPwd" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">新密码</label>
+        <div class="layui-input-block">
+            <input type="password" id="newPwd" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">新密码</label>
+        <div class="layui-input-block">
+            <input type="password" id="newPwd2" class="layui-input">
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript" src="../layui/layui.all.js"></script>
+<script type="text/javascript" src="../js/common.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $('.editInformation').click(function () {
+            if($("#sex").text() === '男'){
+                $(".layui-form-radio").eq(0).click();
+            }
+
+            open('修改用户资料', $('.user-info'), function ($dom, index) {
+                var user = {
+                    sex: $('input:radio:checked').val(),
+                    realName: $("#realName").val(),
+                    phone: $("#phone").val(),
+                    age: $("#age").val(),
+                    email: $("#email").val()
+                };
+                if($.trim(user.realName) == '' || $.trim(user.phone) == ''
+                    || $.trim(user.age) == '' || $.trim(user.email) == ''){
+                    layer.msg('输入不能为空');
+                    return
+                }
+                $.ajax({
+                    type:'post',
+                    url:'editUser',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data:JSON.stringify(user),
+                    success: function (data) {
+                        if( data.success === true){
+                            layer.msg('修改成功');
+
+                            $dom.hide()
+                            layer.close(index);
+
+                            loadUserChildPage('person')
+                        }else{
+                            layer.msg('修改失败');
+                        }
+                    }
+                });
+            })
+        })
+
+        $('.editPwd').click(function () {
+            open('修改密码', $('.edit-pwd'), function ($dom) {
+                var oldPwd = $.trim($("#oldPwd").val());
+                var newPwd = $.trim($("#newPwd").val());
+                var newPwd2 = $.trim($("#newPwd2").val());
+
+                if(oldPwd === '' || newPwd === '' || newPwd2 === ''){
+                    layer.msg('输入不能为空');
+                    return
+                }
+                if(newPwd !== newPwd2){
+                    layer.msg('新密码输入不一致');
+                    return
+                }
+                if(oldPwd === newPwd){
+                    layer.msg('新密码不能与旧密码相同');
+                    return
+                }
+                $.post('editPwd', {oldPwd: oldPwd,newPwd: newPwd}, function (data) {
+                    if( data.success === true){
+                        location.href = '/logout';
+                    }else{
+                        layer.msg(data.message);
+                    }
+                })
+            });
+        })
+
+        $(".my-collection").click(function () {
+            loadUserChildPage('collectionPage')
+        })
+
+        $(".my-attention").click(function () {
+            loadUserChildPage('attentionPage',{userId: $(this).siblings('.id').val()})
+        })
+
+        $(".attention").click(function () {
+            $.post('attention', {userId: $(this).siblings('.id').val()}, function () {
+                layer.msg('关注成功');
+            })
+        })
+    })
+
+    function open(title, $dom, callBack) {
+        layer.open({
+            type: 1
+            ,title:title
+            ,area:['550px', '470px']
+            ,id: 'layerDemo'
+            ,content: $dom
+            ,btn: ['确定']
+            ,btnAlign: 'c'
+            ,yes: function(index){
+                if(callBack){
+                    callBack($dom, index)
+                }
+            }
+            ,cancel: function(){
+                $dom.hide()
+                layer.closeAll();
+            }
+        });
+    }
+</script>
+</body>
+</html>

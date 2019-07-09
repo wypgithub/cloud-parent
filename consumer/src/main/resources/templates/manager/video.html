@@ -1,0 +1,151 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>北极星IT教育</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <style type="text/css">
+        .layui-row{
+            height: 50px;
+        }
+        .edit-video{
+            margin: 30px 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="layui-row">
+        <button class="layui-btn add-video"><i class="layui-icon">&#xe654;</i>  添加</button>
+    </div>
+
+    <table class="layui-table">
+        <colgroup>
+            <col width="150">
+            <col width="200">
+            <col>
+        </colgroup>
+        <thead>
+        <tr>
+            <th>序号</th>
+            <th>名称</th>
+            <th>上传时间</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="video,stat : ${videoList}">
+            <td th:text="${stat.index+1}"></td>
+            <td th:text="${video.name}"></td>
+            <td th:text="${video.createTime}"></td>
+            <td>
+                <input type="hidden" class="id" th:value="${video.id}">
+                <input type="hidden" class="name" th:value="${video.name}">
+
+                <a class="layui-btn layui-btn-normal layui-btn-xs edit-video-btn">
+                    <i class="layui-icon">&#xe642;</i>编辑
+                </a>
+                <a class="layui-btn layui-btn-danger layui-btn-xs delete-video-btn">
+                    <i class="layui-icon">&#xe640;</i>删除
+                </a>
+                <a class="layui-btn layui-btn-danger layui-btn-xs upload_video">
+                    <i class="layui-icon"></i>上传视频
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="layui-form edit-video">
+        <div class="layui-form-item">
+            <label class="layui-form-label">名称</label>
+            <div class="layui-input-block">
+                <input type="text" class="layui-input name">
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="../js/jquery-3.0.0.min.js"></script>
+    <script type="text/javascript" src="../layui/layui.all.js"></script>
+    <script type="text/javascript" src="../js/common.js"></script>
+    <script type="text/javascript">
+        var courseId = localStorage.getItem('courseId')
+
+        $(".add-video").click(function () {
+            openEdit('添加视频')
+        })
+        $(".edit-video-btn").click(function () {
+            var video = {
+                id: $(this).siblings('.id').val(),
+                name: $(this).siblings('.name').val()
+            }
+            openEdit('编辑视频', video)
+        })
+        $(".delete-video-btn").click(function () {
+            $.post('course/deleteVideo',{
+                videoId: $(this).siblings('.id').val()
+            }, function () {
+                layer.msg('操作成功');
+
+                loadChildPage('course/video', {courseId: courseId})
+            });
+        })
+
+        layui.upload.render({
+            elem: '.upload_video'
+            ,url: 'course/upload'
+            ,size: 1024 * 1024 //限制大小，单位 KB
+            ,exts: 'mp4' //允许上传格式
+            ,accept: 'video' //视频
+            ,before: function(obj){
+                this.data={type: 2,'id': $(this.item).siblings('.id').val()};
+            }
+            ,done: function(res){
+                if(res.code === 1){
+                    layer.msg('上传失败');
+                }else {
+                    layer.msg('上传成功');
+                    loadChildPage('course/video', {courseId: courseId})
+                }
+            }
+        });
+        function openEdit(title, video) {
+            video = video || {}
+            video.courseId = courseId
+
+            $('.edit-video input').val(video.name)
+
+            layer.open({
+                type: 1
+                ,title:title
+                ,content: $('.edit-video')
+                ,btn: ['确定']
+                ,yes: function(index){
+                    video.name = $('.edit-video input').val()
+
+                    if($.trim(video.name) === ''){
+                        layer.msg('请输入名称');
+                        return
+                    }
+                    $.ajax({
+                        type:'post',
+                        dataType: 'json',
+                        url:'course/editVideo',
+                        contentType: 'application/json',
+                        data:JSON.stringify(video),
+                        success: function (data) {
+                            layer.msg('操作成功');
+
+                            layer.close(index)
+
+                            loadChildPage('course/video', {courseId: parseInt(courseId)})
+                        }
+                    });
+                }
+                ,cancel: function(){
+                    $('.edit-video').hide()
+                }
+            });
+        }
+    </script>
+</body>
+</html>

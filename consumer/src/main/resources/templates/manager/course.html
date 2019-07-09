@@ -1,0 +1,193 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>北极星IT教育</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <style type="text/css">
+        .layui-row{
+            height: 50px;
+        }
+        .edit-course{
+            margin: 30px auto;
+            display: none;
+        }
+        .edit-course input{
+            width: 90%;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-row">
+    <button class="layui-btn add-course"><i class="layui-icon">&#xe654;</i>  添加</button>
+</div>
+
+<table class="layui-table">
+    <thead>
+    <tr>
+        <th>名称</th>
+        <th>图片</th>
+        <th>教师</th>
+        <th>创建时间</th>
+        <th>推荐排序</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="course : ${courseList}">
+        <td th:text="${course.name}"></td>
+        <td>
+            <img th:src="'/course/' + ${course.id} + '.jpg?tm=' + ${new java.util.Date().getTime()}">
+        </td>
+        <td th:text="${course.teacher}"></td>
+        <td th:text="${course.createTime}"></td>
+        <td th:if="${course.order == -1}">自动</td>
+        <td th:if="${course.order != -1}" th:text="${course.order}"></td>
+        <td>
+            <input type="hidden" class="id" th:value="${course.id}">
+            <input type="hidden" class="name" th:value="${course.name}">
+            <input type="hidden" class="order" th:value="${course.order}">
+
+            <a class="layui-btn layui-btn-normal layui-btn-xs edit-course-btn">
+                <i class="layui-icon">&#xe642;</i>编辑
+            </a>
+            <a class="layui-btn layui-btn-danger layui-btn-xs delete-course-btn">
+                <i class="layui-icon">&#xe640;</i>删除
+            </a>
+            <a class="layui-btn layui-btn-danger layui-btn-xs upload_png">
+                <i class="layui-icon"></i>上传图片
+            </a>
+            <a class="layui-btn layui-btn-danger layui-btn-xs video-manager">视频管理</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+
+<div class="layui-form edit-course">
+    <div class="layui-form-item">
+        <label class="layui-form-label">名称</label>
+        <div class="layui-input-block">
+            <input type="text" class="layui-input name">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">教师</label>
+        <div class="layui-input-block">
+            <select class="teacher">
+                <option>王老师</option>
+                <option>张老师</option>
+                <option>李老师</option>
+                <option>宋老师</option>
+                <option>安老师</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">推荐排序</label>
+        <div class="layui-input-block">
+            <select class="order">
+                <option value="-1">自动</option>
+                <option th:each="course,status : ${courseList}"
+                        th:value="${status.index} + 1" th:text="${status.index} + 1"></option>
+            </select>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript" src="../js/jquery-3.0.0.min.js"></script>
+<script type="text/javascript" src="../layui/layui.all.js"></script>
+<script type="text/javascript" src="../js/common.js"></script>
+<script type="text/javascript">
+    $(".add-course").click(function () {
+        openEdit('添加课程')
+    })
+    $(".edit-course-btn").click(function () {
+        var course = {
+            id: $(this).siblings('.id').val(),
+            name: $(this).siblings('.name').val(),
+            order: $(this).siblings('.order').val()
+        }
+
+        $('.edit-course .name').val(course.name)
+
+        openEdit('编辑课程', course)
+    })
+
+    $(".delete-course-btn").click(function () {
+        $.post('course/delete',{
+            courseId: $(this).siblings('.id').val()
+        }, function () {
+            layer.msg('操作成功');
+
+            loadChildPage('course')
+        });
+    })
+
+    $(".video-manager").click(function () {
+        var courseId = $(this).siblings('.id').val()
+        loadChildPage('course/video', {courseId: parseInt(courseId)})
+        localStorage.setItem('courseId', courseId)
+    })
+
+    layui.upload.render({
+        elem: '.upload_png'
+        ,url: 'course/upload'
+        ,size: 1024 //限制大小，单位 KB
+        ,exts: 'jpg' //允许上传格式
+        ,accept: 'file' //图片
+        ,before: function(obj){
+            this.data={type: 1,'id': $(this.item).siblings('.id').val()};
+        }
+        ,done: function(res){
+            if(res.code === 1){
+                layer.msg('上传失败');
+            }else {
+                layer.msg('上传成功');
+                loadChildPage('course')
+            }
+        }
+    });
+
+    function openEdit(title, course) {
+        course = course || {}
+
+        layer.open({
+            type: 1
+            ,title:title
+            ,area: ['500px', '450px']
+            ,content: $('.edit-course')
+            ,btn: ['确定']
+            ,yes: function(index){
+                course.name = $('.edit-course .name').val()
+                course.teacher = $('.edit-course .teacher').val()
+                course.order = $('.edit-course .order').val()
+
+                if($.trim(course.name) === ''){
+                    layer.msg('请输入名称');
+                    return
+                }
+                $.ajax({
+                    type:'post',
+                    url:'course/edit',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data:JSON.stringify(course),
+                    success: function (data) {
+                        layer.msg('操作成功');
+
+                        layer.close(index)
+
+                        loadChildPage('course')
+                    }
+                });
+            }
+            ,cancel: function(){
+                $('.edit-course').hide()
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

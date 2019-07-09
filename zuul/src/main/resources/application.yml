@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: ZUUL
+server:
+  port: 8764
+ribbon:
+  ConnectTimeout: 60000
+  ReadTimeout: 60000
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+zuul:
+  routes:
+    api-consumer:
+      path: /provider/**
+      serviceId: PROVIDER
+      #保持分发到服务后session一致
+      sensitiveHeaders: "*"
+      stripPrefix: false
+    api-provider:
+      path: /consumer/**
+      serviceId: CONSUMER
+      #保持分发到服务后session一致
+      sensitiveHeaders: "*"
+      stripPrefix: true
+

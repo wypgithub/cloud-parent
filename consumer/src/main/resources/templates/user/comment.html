@@ -1,0 +1,81 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>北极星IT教育</title>
+    <meta charset="utf-8" />
+    <style type="text/css">
+        img{
+            width: 50px;
+            height: 50px;
+        }
+        .title{
+            position: relative;
+            color: #1E9FFF;
+            height: 15px;
+            font-size: 15px;
+            line-height: 20px;
+        }
+        .content{
+            margin-top: 10px;
+            text-align: left;
+            height: 30px;
+            line-height: 30px;
+        }
+        .title div{
+            position: absolute;
+            left: 0;
+            text-align: left;
+            width: 100px;
+        }
+        .title .operate{
+            cursor: pointer;
+            right: 0;
+            left: auto;
+        }
+        .title span{
+            color: red;
+            cursor: pointer;
+            margin-left: 30px;
+        }
+        .layui-row{
+            height: 50px;
+            margin: 20px auto;
+        }
+        .layui-col-md11{
+            border-bottom: 1px solid gainsboro;
+        }
+    </style>
+</head>
+<div class="layui-row" th:each="comment : ${commentList}">
+    <div class="layui-col-md1">
+        <a>
+            <input type="hidden" th:value="${comment.userId}">
+            <img class="person-center" src="../image/user.jpg">
+        </a>
+    </div>
+    <div class="layui-col-md11">
+        <div class="title">
+            <div class="user-name" th:text="${comment.userName}"></div>
+            <div class="operate">
+                <input type="hidden" th:value="${comment.id}">
+                举报
+            </div>
+        </div>
+        <div class="content" th:text="${comment.content}"></div>
+    </div>
+</div>
+<script>
+    $(".person-center").click(function () {
+        loadUserChildPage('person', {userId: $(this).siblings('input').val()})
+    })
+
+    $(".operate").click(function () {
+        var commentId = $(this).find('input').val()
+
+        $.post('report',{
+            commentId: commentId
+        }, function () {
+            layer.msg('举报成功,我们将尽快处理');
+        });
+    });
+</script>
+</html>

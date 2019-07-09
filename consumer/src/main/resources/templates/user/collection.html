@@ -1,0 +1,46 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<table class="layui-table">
+    <colgroup>
+        <col width="150">
+        <col width="200">
+        <col width="250">
+        <col>
+    </colgroup>
+    <thead>
+    <tr>
+        <th>图片</th>
+        <th>名称</th>
+        <th>学习进度</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="collection : ${collectionList}">
+        <td>
+            <img th:src="'/course/' + ${collection.courseId} + '.jpg'">
+        </td>
+        <td th:text="${collection.courseName}"></td>
+        <td>
+            <input type="hidden" class="courseId" th:value="${collection.courseId}">
+            <input type="hidden" class="videoId" th:value="${collection.videoId}">
+            <a href="#" class="enter-course" th:text="${collection.videoName}"></a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<script type="text/javascript" src="../js/common.js"></script>
+<script type="text/javascript">
+    $(".enter-course").click(function () {
+        var courseId = $(this).siblings('.courseId').val()
+        var videoId = $(this).siblings('.videoId').val()
+
+        localStorage.setItem('courseId', courseId)
+        localStorage.setItem('videoId', videoId)
+
+        loadUserChildPage('courseIndex', {courseId: courseId})
+    })
+</script>
+
+</body>
+</html>

@@ -1,0 +1,203 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <style type="text/css">
+        .video_div{
+            width: 100%;
+            height: 400px;
+            margin-top: 20px;
+        }
+        .video_div_child{
+            float: left;
+        }
+        .video-list{
+            width: 20%;
+            height: 100%;
+            margin-right: 5px;
+            padding-left: 10px;
+        }
+        .video-list .title{
+            font-size: 15px;
+            text-align: left;
+            padding: 10px;
+            height: 20px;
+            line-height: 20px;
+            border-bottom: 1px solid gainsboro;
+        }
+        .video-list ul{
+           overflow-y: auto;
+        }
+        .video-panel{
+            width: 60%;
+        }
+        .video-comment{
+            width: 18%;
+        }
+        .layui-input-block{
+            margin-left: 10px !important;
+        }
+        .video-comment .message{
+            width: 100%;
+            height: 100px;
+            margin-top: 250px;
+        }
+        .player{
+            width: 100%;
+            height: 100%;
+        }
+        .comment{
+            width: 100%;
+            height: 300px;
+            margin-top: 20px;
+            overflow-y: auto;
+        }
+        .layui-row{
+            height: 50px;
+            margin: 20px auto;
+        }
+        .video-item{
+            margin-top: 5px;
+            cursor: pointer;
+        }
+        .layui-btn{
+            float: right;
+        }
+    </style>
+</head>
+<body>
+<div class="video_div">
+    <div class="video-list video_div_child">
+        <div class="title">视频列表
+            <span class="collection">收藏</span>
+            <span class="teacher" th:text="${course.teacher}"></span>
+        </div>
+        <ul th:each="video : ${videoList}">
+            <li class="video-item">
+                <input type="hidden" th:value="${video.id}">
+                <span th:text="${video.name}"></span>
+            </li>
+        </ul>
+    </div>
+    <div class="video-panel video_div_child">
+        <div class="video">
+            <video src="" controls="controls" class="player"></video>
+        </div>
+    </div>
+    <div class="video-comment video_div_child">
+        <div class="layui-row message">
+            <div class="layui-form-item layui-form-text">
+                <div class="layui-input-block">
+                    <textarea placeholder="请输入对该课程意见或建议" class="layui-textarea"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="layui-row">
+            <button class="layui-btn report-btn">评论</button>
+        </div>
+    </div>
+</div>
+
+<div class="comment"></div>
+
+<script type="text/javascript">
+    var courseId  =localStorage.getItem('courseId')
+    var videoId  =localStorage.getItem('videoId')
+
+    $(function () {
+        var $videoItem = $(".video-item")
+
+        var videoIdTemp = undefined
+        //点击视频列表中视频切换video的链接并记录用户学习进度
+        $videoItem.click(function () {
+            videoIdTemp = $(this).find('input').val()
+
+            //切换video的链接
+            $("video").attr('src', '../video/' + videoIdTemp + '.mp4');
+
+            //记录用户学习进度
+            $.post('recordProgress',{
+                courseId: courseId,
+                videoId: videoIdTemp
+            });
+        })
+
+        $(".collection").click(function () {
+            if(!videoIdTemp){
+                layer.msg('管理员还没有为该课程上传视频,无法收藏');
+                return
+            }
+            $.post('collection',{
+                courseId: courseId,
+                videoId: videoIdTemp
+            }, function (data) {
+                if(data.success){
+                    layer.msg('收藏成功');
+                }else {
+                    layer.msg('改课程已经被您收藏');
+                }
+            });
+        });
+
+        $(".teacher").click(function () {
+            loadUserChildPage('teacherCoursePage',{teacherName:  $(this).text()})
+        });
+
+        $(".report-btn").click(function () {
+            var content = $("textarea").val()
+            if($.trim(content) == ''){
+                layer.msg('请输入评论内容');
+                return
+            }
+            var comment = {
+                courseId: courseId,
+                content: content
+            }
+            $.ajax({
+                type:'post',
+                url:'comment',
+                dataType: 'json',
+                contentType: 'application/json',
+                data:JSON.stringify(comment),
+                success: function (res) {
+                    if(res.success){
+                        loadCommentList()
+                        layer.msg('评论成功');
+                    }else {
+                        layer.msg(res.message);
+                    }
+                }
+            });
+        });
+
+
+        //默认加载第一个视频
+        if( $videoItem.length > 0){
+            if(videoId && 'undefined' != videoId){
+                $videoItem.each(function (item) {
+                    if($(item).find('input').val() === videoId){
+                        $(item).click()
+                        return
+                    }
+                })
+            }else {
+                $videoItem.eq(0).click()
+            }
+        }
+
+        loadCommentList()
+    });
+
+    /**
+     * 加载评论列表
+     */
+    function loadCommentList() {
+        $.get('commentList',{
+            courseId: courseId
+        }, function (data) {
+            $(".comment").html(data)
+        });
+
+    }
+</script>
+
+</body>
+</html>

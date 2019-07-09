@@ -1,0 +1,41 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<table class="layui-table">
+    <colgroup>
+        <col width="150">
+        <col width="200">
+        <col>
+    </colgroup>
+    <thead>
+    <tr>
+        <th>名称</th>
+        <th>图片</th>
+        <th>创建时间</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="course : ${courseList}">
+        <td th:text="${course.name}"></td>
+        <td>
+            <img th:src="'/course/' + ${course.id} + '.jpg'">
+        </td>
+        <td th:text="${course.createTime}"></td>
+        <td>
+            <input type="hidden" class="id" th:value="${course.id}">
+            <a class="layui-btn layui-btn-danger layui-btn-xs enter-course">查看课程</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<script type="text/javascript">
+    $(".enter-course").click(function () {
+        var courseId =  $(this).siblings('.id').val()
+        localStorage.setItem('courseId', courseId)
+        loadUserChildPage('courseIndex',{courseId:  courseId})
+    })
+</script>
+
+</body>
+</html>

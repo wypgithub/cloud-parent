@@ -1,0 +1,39 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>北极星IT教育</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <link rel="stylesheet" type="text/css" href="../layui/css/layui.css" />
+    <link rel="stylesheet" type="text/css" href="../css/base.css" />
+    <style type="text/css">
+        .layui-nav .right{
+            position: absolute;
+            right: 0;
+        }
+    </style>
+</head>
+<body>
+<ul class="layui-nav">
+    <li class="layui-nav-item layui-this" id="course"><a href="#">课程信息管理</a></li>
+    <li class="layui-nav-item" id="comment"><a href="#">评论管理</a></li>
+    <li class="layui-nav-item" id="user"><a href="#">用户管理</a></li>
+
+    <li class="layui-nav-item right"><a href="../logout">退出</a></li>
+</ul>
+<div class="layui-main"></div>
+
+
+<script type="text/javascript" src="../js/jquery-3.0.0.min.js"></script>
+<script type="text/javascript" src="../layui/layui.all.js"></script>
+<script type="text/javascript" src="../js/common.js"></script>
+<script type="text/javascript">
+
+    loadChildPage('course')
+
+    $(".layui-nav li").click(function () {
+        loadChildPage($(this).attr('id'))
+    })
+</script>
+
+</body>
+</html>
