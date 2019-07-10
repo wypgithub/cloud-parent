@@ -1,10 +1,25 @@
 server:
   port: 8765
 spring:
+  application:
+    name: config-server
+  security:
+    user:
+      name: user
+      password: user
   profiles:
     active: native
   cloud:
     config:
       server:
         native:
-          search-locations: G:/TEMP
+          search-locations: classpath:properties
+      fail-fast: true  #实现客户端优先判断ConfigServer获取是否正常， 并快速响应失败内容
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost
+
